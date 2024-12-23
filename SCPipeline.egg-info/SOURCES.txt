@@ -1,0 +1,5 @@
+setup.py
+SCPipeline.egg-info/PKG-INFO
+SCPipeline.egg-info/SOURCES.txt
+SCPipeline.egg-info/dependency_links.txt
+SCPipeline.egg-info/top_level.txt
