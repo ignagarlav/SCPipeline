@@ -55,18 +55,6 @@ def exportar_datosV1(adata, seurat_dir):
     fullPath = os.path.join(seurat_dir, current_date)
     os.makedirs(fullPath, exist_ok=True)
 
-    # Exportar los datos de expresión normalizados y escalados (scaled data)
-    scaled = pd.DataFrame(
-        adata.X,  # Use raw data if available
-        index=adata.obs_names,  # Cell barcodes
-        columns=adata.var_names,  # Gene names
-    )
-    scaled_transposed = scaled.T
-    file_name = f"{current_date}_scaled.csv"
-    file_path = os.path.join(fullPath, file_name)
-    scaled_transposed.to_csv(file_path)
-
-       
     # Save .var (gene metadata)
     var_path = os.path.join(fullPath, "var.csv")
     adata.var.to_csv(var_path)
@@ -79,7 +67,7 @@ def exportar_datosV1(adata, seurat_dir):
     adata.obs.to_csv(file_path)
  
     # Save each layer in .layers
-    for layer_name, layer_data in adata.layers.items():
+    for layer_name in adata.layers.keys():
         layer_path = os.path.join(fullPath, f"layer_{layer_name}_sparse.mtx")
 
         if isinstance(adata.layers.get(layer_name), scipy.sparse.spmatrix):
@@ -92,21 +80,23 @@ def exportar_datosV1(adata, seurat_dir):
 
    
     # Export UMAP coordinates
-    for key in adata.obsm.keys():
-            # Check if the key corresponds to a UMAP embedding
-            if key.startswith('X_umap'):
-                # Extract UMAP coordinates
-                umap_coords = pd.DataFrame(
-                    adata.obsm[key],
-                    index=adata.obs_names,
-                    columns=[f'{key}_1', f'{key}_2']
-                )
-                # Construct file name and path
-                file_name = f"{current_date}_{key}_coords.csv"
-                file_path = os.path.join(fullPath, file_name)
-            
-                # Save to CSV
-                umap_coords.to_csv(file_path)
+    if any(key.startswith('X_umap') for key in adata.obsm.keys()):
+
+        for key in adata.obsm.keys():
+                # Check if the key corresponds to a UMAP embedding
+                if key.startswith('X_umap'):
+                    # Extract UMAP coordinates
+                    umap_coords = pd.DataFrame(
+                        adata.obsm[key],
+                        index=adata.obs_names,
+                        columns=[f'{key}_1', f'{key}_2']
+                    )
+                    # Construct file name and path
+                    file_name = f"{current_date}_{key}_coords.csv"
+                    file_path = os.path.join(fullPath, file_name)
+                
+                    # Save to CSV
+                    umap_coords.to_csv(file_path)
 
 
 
